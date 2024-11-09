@@ -1,13 +1,14 @@
+/* eslint-disable react/jsx-key */
 import React, { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AppContext } from '../context/Context'
 import { assets } from '../assets/assets'
-import js from '@eslint/js'
 
 const Appointment = () => {
 
     const { docId } = useParams()
     const { doctors, currencySymbol } = useContext(AppContext)
+    const dayOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
     const [docInfo, setDocInfo] = useState(null)
     const [docSlots, setDocSlots] = useState([])
@@ -34,7 +35,7 @@ const Appointment = () => {
             endTime.setHours(21, 0, 0, 0)
 
             if (today.getDate() === currentDate.getDate()) {
-                currentDate().setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
+                currentDate.setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
                 currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
 
             } else {
@@ -68,8 +69,8 @@ const Appointment = () => {
     }, [docInfo])
 
     useEffect(() => {
-        
-    } , [])
+        console.log(docSlots)
+    }, [docSlots])
 
     return docInfo && (
         <div>
@@ -97,8 +98,30 @@ const Appointment = () => {
                     </p>
                 </div>
             </div>
+
+            <div className='sm:ml-72 sm:pl-4 mt-4 font-medium text-gray-700'>
+                <p>Booking slots</p>
+                <div className='flex gap-3 items-center w-full overflow-x-scroll mt-4'>
+                    {docSlots.length && docSlots.map((item, index) => (
+                        <div onClick={() => setSlotIndex(index)} className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${slotIndex === index ? 'bg-primary text-white' : 'border border-gray-200'}`} key={index}>
+                            <p>{item[0] && dayOfWeek[item[0].datetime.getDay()]}</p>
+                            <p>{item[0] && item[0].datetime.getDate()}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <div>
+                    {docSlots.length && docSlots[slotIndex].map((item, index) => (
+                        <p key={index}>
+                            {item.time.toLowerCase()}
+                        </p>
+                    ))}
+                </div>
+                <button className='bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6 '>Book an appointment</button>
+            </div>
         </div>
     )
 }
 
 export default Appointment
+
