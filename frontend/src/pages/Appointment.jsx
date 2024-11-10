@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AppContext } from '../context/Context'
 import { assets } from '../assets/assets'
+import RelatedDoctors from '../components/RelatedDoctors'
 
 const Appointment = () => {
 
@@ -18,7 +19,6 @@ const Appointment = () => {
     const fetchDocInfo = async () => {
         const docInfo = doctors.find(doc => doc._id === docId)
         setDocInfo(docInfo)
-        console.log(docInfo)
     }
 
     const getAvailableSlots = async () => {
@@ -41,6 +41,7 @@ const Appointment = () => {
             } else {
                 currentDate.setHours(10)
                 currentDate.setMinutes(0)
+
             }
 
             let timeSlots = []
@@ -69,7 +70,7 @@ const Appointment = () => {
     }, [docInfo])
 
     useEffect(() => {
-        console.log(docSlots)
+
     }, [docSlots])
 
     return docInfo && (
@@ -104,21 +105,26 @@ const Appointment = () => {
                 <div className='flex gap-3 items-center w-full overflow-x-scroll mt-4'>
                     {docSlots.length && docSlots.map((item, index) => (
                         <div onClick={() => setSlotIndex(index)} className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${slotIndex === index ? 'bg-primary text-white' : 'border border-gray-200'}`} key={index}>
+                            
                             <p>{item[0] && dayOfWeek[item[0].datetime.getDay()]}</p>
                             <p>{item[0] && item[0].datetime.getDate()}</p>
                         </div>
                     ))}
                 </div>
 
-                <div>
+                <div className='flex items-center gap-3 w-full overflow-x-scroll mt-4'>
                     {docSlots.length && docSlots[slotIndex].map((item, index) => (
-                        <p key={index}>
+                        <p className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${item.time === slotTime ? 'bg-primary text-white' : 'text-gray-400 border border-gray-300'}`}
+                            key={index} onClick={() => setSlotTime(item.time)}>
                             {item.time.toLowerCase()}
                         </p>
                     ))}
                 </div>
                 <button className='bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6 '>Book an appointment</button>
             </div>
+
+            <RelatedDoctors docId={docId} speciality={docInfo.speciality} />
+
         </div>
     )
 }
