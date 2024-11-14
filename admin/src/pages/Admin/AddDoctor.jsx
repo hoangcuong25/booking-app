@@ -43,22 +43,28 @@ const AddDoctor = () => {
             formData.append('degree', degree)
             formData.append('address', JSON.stringify({ line1: address1, line2: address2 }))
 
-            const response = await axios.post(`${backendUrl}/api/admin/add-doctor`, formData, { headers: { aToken } })
+            const { data } = await axios.post(`${backendUrl}/api/admin/add-doctor`, formData, { headers: { aToken } })
 
-            if (response.success) {
-                toast.success(response.message)
+            if (data.success) {
+                toast.success(data.message)
+                setDocImg(false)
+                setName('')
+                setPassword('')
+                setEmail('')
+                setAddress1('')
+                setAddress2('')
+                setDegree('')
+                setAbout('')
+                setFees('')
+
             } else {
-                toast.error(response.message)
+                toast.error(data.message)
             }
 
         } catch (error) {
-            toast.error(error?.response?.message)
+            toast.error(error.message)
         }
     }
-
-    useEffect(() => {
-        console.log(docImg)
-    }, [docImg])
 
     return (
         <form onSubmit={onSubmitHandler} className='m-5 w-full'>
