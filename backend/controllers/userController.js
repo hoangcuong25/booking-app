@@ -147,10 +147,10 @@ const bookAppointment = async (req, res) => {
             userId,
             docId,
             userData,
-            docData,
-            amount: docData.fees,
             slotTime,
             slotDate,
+            docData,
+            amount: docData.fees,
             date: Date.now()
         }
 
@@ -168,4 +168,55 @@ const bookAppointment = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment }
+// api to get user appointment for fronted my-appointment page
+const listAppointment = async (req, res) => {
+    try {
+        const { userId } = req.body
+        const appointments = await appoitnmentModel.find({ userId })
+
+        res.json({ success: true, appointments })
+
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+// api to canncel appointment
+const canncelAppointment = async (req, res) => {
+    try {
+        const { userId, appointmentId } = req.body
+
+        const appointmentData = await appoitnmentModel.findById(appointmentId)
+
+        // verify appoimtment user
+        if (appointmentData.userId !== userId) {
+            return res.json({ success: false, message: "Unauthorized action" })
+        }
+
+        await appoitnmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
+
+        // releasing doctor slot
+        const { docId, slotDate, slotTime } = appointmentData
+
+        const doctorData = await doctorModel.findById(docId)
+
+        let slots_booked = doctorData.slots_booked
+
+        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+
+        res.json({ success: true, message: 'appoinment cancelled' })
+
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+
+
+
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, canncelAppointment }
