@@ -4,6 +4,8 @@ import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
 import jwt from 'jsonwebtoken'
 import appointemtModel from '../models/appointmenModel.js'
+import appoitnmentModel from '../models/appointmenModel.js'
+import userModel from '../models/userModel.js'
 
 // api for adding doctor
 const addDoctor = async (req, res) => {
@@ -102,4 +104,54 @@ const appointmentsAdmin = async (req, res) => {
     }
 }
 
-export { addDoctor, loginAdmin, allDoctors, appointmentsAdmin }
+// api for appointment cancelled
+const appointmentCancel = async (req, res) => {
+    try {
+        const { appointmentId } = req.body
+
+        const appointmentData = await appoitnmentModel.findById(appointmentId)
+
+        await appoitnmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
+
+        // releasing doctor slot
+        const { docId, slotDate, slotTime } = appointmentData
+
+        const doctorData = await doctorModel.findById(docId)
+
+        let slots_booked = doctorData.slots_booked
+
+        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+
+        res.json({ success: true, message: 'appoinment cancelled' })
+
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+// api to get dashboard data for admin pannel
+const adminDashboard = async (req, res) => {
+    try {
+        const doctors = await doctorModel.find({})
+        const users = await userModel.find({})
+        const appointments = await appointemtModel.find({})
+
+        const dashData = {
+            doctors: doctors.length,
+            appointments: appointments.length,
+            patients: users.length,
+            latestAppointments: appointments.reverse().slice(0, 5)
+        }
+
+        res.json({ success: true, dashData })
+
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export { addDoctor, loginAdmin, allDoctors, appointmentsAdmin, appointmentCancel, adminDashboard }
