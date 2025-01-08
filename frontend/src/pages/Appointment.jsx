@@ -46,7 +46,6 @@ const Appointment = () => {
             } else {
                 currentDate.setHours(10)
                 currentDate.setMinutes(0)
-
             }
 
             let timeSlots = []
