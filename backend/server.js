@@ -26,4 +26,4 @@ app.get('/', (req, res) => {
     res.send("API WORKING")
 })
 
-app.listen(port, () => console.log('Sever Started', port))
+app.listen(process.env.PORT, () => console.log('Sever Started', port))
